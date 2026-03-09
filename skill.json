@@ -1,0 +1,397 @@
+{
+  "name": "jwlearn",
+  "displayName": "JWLearn - Medical Exam Learning Assistant",
+  "description": "Intelligent learning tool for medical exam preparation with PDF parsing, question bank management, smart exam generation and spaced repetition review",
+  "version": "1.0.0",
+  "author": "jw",
+  "commands": [
+    {
+      "name": "parse",
+      "description": "Parse a document, extract structured knowledge points, and optionally add to review deck",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "string",
+          "description": "Path to the input document (markdown/txt/pdf/docx)",
+          "required": true
+        },
+        {
+          "name": "auto-add",
+          "type": "boolean",
+          "description": "Automatically add extracted knowledge points to review deck",
+          "default": false
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "description": "Optional output path to save parsed results",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/parse.sh {input} {auto-add} {output}"
+      ]
+    },
+    {
+      "name": "convert",
+      "description": "Convert document between different formats (PDF→MD/TXT, MD/TXT→JSON)",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "string",
+          "description": "Path to source file",
+          "required": true
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "description": "Path to output file (format inferred from extension: .md, .txt, .json)",
+          "required": true
+        }
+      ],
+      "execute": [
+        "bash:./scripts/convert.sh {input} {output}"
+      ]
+    },
+    {
+      "name": "review",
+      "description": "Start an FSRS-based spaced repetition review session",
+      "parameters": [
+        {
+          "name": "limit",
+          "type": "integer",
+          "description": "Maximum number of cards to review (default: 20)",
+          "default": 20,
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/review.sh {limit}"
+      ]
+    },
+    {
+      "name": "stats",
+      "description": "Display comprehensive learning statistics and progress",
+      "execute": [
+        "bash:./scripts/stats.sh"
+      ]
+    },
+    {
+      "name": "qa",
+      "description": "Ask questions about your knowledge base",
+      "parameters": [
+        {
+          "name": "question",
+          "type": "string",
+          "description": "The question to answer",
+          "required": true
+        },
+        {
+          "name": "document",
+          "type": "string",
+          "description": "Optional document name/ID to limit search scope",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/qa.sh \"{question}\" {document}"
+      ]
+    },
+    {
+      "name": "generate",
+      "description": "Generate practice exercises from knowledge base",
+      "parameters": [
+        {
+          "name": "source",
+          "type": "string",
+          "description": "Document name/ID to generate questions from",
+          "required": true
+        },
+        {
+          "name": "count",
+          "type": "integer",
+          "description": "Number of questions to generate (default: 5)",
+          "default": 5,
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Question type: multiple-choice, true-false, short-answer, all (default: all)",
+          "default": "all",
+          "choices": ["multiple-choice", "true-false", "short-answer", "all"],
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/generate.sh {source} {count} {type}"
+      ]
+    },
+    {
+      "name": "search",
+      "description": "Search knowledge base by keyword",
+      "parameters": [
+        {
+          "name": "keyword",
+          "type": "string",
+          "description": "Search keyword",
+          "required": true
+        },
+        {
+          "name": "document",
+          "type": "string",
+          "description": "Optional document ID to limit search scope",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/search.sh \"{keyword}\" {document}"
+      ]
+    },
+    {
+      "name": "chapters",
+      "description": "List all chapters of a document",
+      "parameters": [
+        {
+          "name": "document",
+          "type": "string",
+          "description": "Document ID",
+          "required": true
+        }
+      ],
+      "execute": [
+        "bash:./scripts/chapters.sh {document}"
+      ]
+    },
+    {
+      "name": "cross-chapter",
+      "description": "Get cross-chapter comparative insights for a document",
+      "parameters": [
+        {
+          "name": "document",
+          "type": "string",
+          "description": "Document ID",
+          "required": true
+        }
+      ],
+      "execute": [
+        "bash:./scripts/cross_chapter.sh {document}"
+      ]
+    },
+    {
+      "name": "bank-import",
+      "description": "Import PDF question bank, auto-extract chapters, questions, answers and associate with knowledge points",
+      "parameters": [
+        {
+          "name": "input",
+          "type": "string",
+          "description": "Path to the PDF question bank file",
+          "required": true
+        },
+        {
+          "name": "subject",
+          "type": "string",
+          "description": "Subject/course name for the question bank",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Optional custom title for the question bank",
+          "required": false
+        },
+        {
+          "name": "answer-page",
+          "type": "integer",
+          "description": "Page number where answers start (for separate answer section)",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/bank_import.sh {input} {subject} {title} {answer-page}"
+      ]
+    },
+    {
+      "name": "bank-list",
+      "description": "Browse all question banks and their chapter structures",
+      "parameters": [
+        {
+          "name": "bank-id",
+          "type": "string",
+          "description": "Optional specific bank ID to view detailed chapter structure",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/bank_list.sh {bank-id}"
+      ]
+    },
+    {
+      "name": "bank-extract",
+      "description": "Extract questions by multiple dimensions: chapter, knowledge point, question type, difficulty",
+      "parameters": [
+        {
+          "name": "bank-id",
+          "type": "string",
+          "description": "Question bank ID to extract from",
+          "required": true
+        },
+        {
+          "name": "count",
+          "type": "integer",
+          "description": "Number of questions to extract (default: 10)",
+          "default": 10,
+          "required": false
+        },
+        {
+          "name": "chapter",
+          "type": "string",
+          "description": "Optional chapter ID/name to filter by",
+          "required": false
+        },
+        {
+          "name": "type",
+          "type": "string",
+          "description": "Optional question type to filter by: single_choice, multiple_choice, true_false, short_answer, essay",
+          "required": false,
+          "choices": ["single_choice", "multiple_choice", "true_false", "short_answer", "essay"]
+        },
+        {
+          "name": "difficulty",
+          "type": "integer",
+          "description": "Optional difficulty level to filter by (1-5)",
+          "minimum": 1,
+          "maximum": 5,
+          "required": false
+        },
+        {
+          "name": "knowledge-point",
+          "type": "string",
+          "description": "Optional knowledge point ID/keyword to filter by",
+          "required": false
+        },
+        {
+          "name": "random",
+          "type": "boolean",
+          "description": "Whether to randomize question order (default: true)",
+          "default": true,
+          "required": false
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "description": "Optional output path to save extracted questions",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/bank_extract.sh {bank-id} {count} {chapter} {type} {difficulty} {knowledge-point} {random} {output}"
+      ]
+    },
+    {
+      "name": "exam-generate",
+      "description": "Automatically generate exam paper with difficulty control, knowledge point coverage, and question type ratio",
+      "parameters": [
+        {
+          "name": "bank-ids",
+          "type": "string",
+          "description": "Comma-separated list of question bank IDs to use",
+          "required": true
+        },
+        {
+          "name": "title",
+          "type": "string",
+          "description": "Exam paper title",
+          "required": true
+        },
+        {
+          "name": "total-score",
+          "type": "integer",
+          "description": "Total score of the exam (default: 100)",
+          "default": 100,
+          "required": false
+        },
+        {
+          "name": "duration",
+          "type": "integer",
+          "description": "Exam duration in minutes (default: 120)",
+          "default": 120,
+          "required": false
+        },
+        {
+          "name": "difficulty-distribution",
+          "type": "string",
+          "description": "Difficulty distribution as comma-separated values (easy:medium:hard, e.g., 3:5:2)",
+          "default": "3:5:2",
+          "required": false
+        },
+        {
+          "name": "type-ratio",
+          "type": "string",
+          "description": "Question type ratio as comma-separated key:value pairs (e.g., single_choice:40,multiple_choice:30,true_false:10,short_answer:20)",
+          "required": true
+        },
+        {
+          "name": "knowledge-coverage",
+          "type": "number",
+          "description": "Minimum knowledge point coverage rate (0-1, default: 0.8)",
+          "default": 0.8,
+          "minimum": 0,
+          "maximum": 1,
+          "required": false
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "description": "Output path for the generated exam paper (supports .md or .pdf)",
+          "required": true
+        }
+      ],
+      "execute": [
+        "bash:./scripts/exam_generate.sh {bank-ids} {title} {total-score} {duration} {difficulty-distribution} {type-ratio} {knowledge-coverage} {output}"
+      ]
+    },
+    {
+      "name": "wrongbook",
+      "description": "Wrong question book management: browse, review, export, clear",
+      "parameters": [
+        {
+          "name": "action",
+          "type": "string",
+          "description": "Action to perform: list, review, export, clear, mark-mastered",
+          "required": true,
+          "choices": ["list", "review", "export", "clear", "mark-mastered"]
+        },
+        {
+          "name": "bank-id",
+          "type": "string",
+          "description": "Optional filter by question bank ID",
+          "required": false
+        },
+        {
+          "name": "limit",
+          "type": "integer",
+          "description": "Maximum number of questions to review (default: 20)",
+          "default": 20,
+          "required": false
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "description": "Output path for export action",
+          "required": false
+        },
+        {
+          "name": "question-id",
+          "type": "string",
+          "description": "Question ID for mark-mastered action",
+          "required": false
+        }
+      ],
+      "execute": [
+        "bash:./scripts/wrongbook.sh {action} {bank-id} {limit} {output} {question-id}"
+      ]
+    }
+  ],
+  "requirements": []
+}

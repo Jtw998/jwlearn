@@ -1,0 +1,18 @@
+# 临时文件
+tmp/
+*.log
+*.tmp
+*.pdf
+*.txt
+*.md
+__pycache__/
+*.pyc
+
+# 个人学习数据
+data/question_banks.json
+data/wrong_questions.json
+data/exam_papers.json
+data/knowledge/*
+data/indexes/*
+data/cards/*
+data/stats/*

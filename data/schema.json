@@ -1,0 +1,237 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Learn Skill Data Schema",
+  "description": "JSON Schema for all data storage in the pure prompt learn skill",
+
+  "definitions": {
+    "KnowledgePoint": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique knowledge point ID" },
+        "document_id": { "type": "string", "description": "Parent document ID" },
+        "topic": { "type": "string", "description": "Topic category" },
+        "content": { "type": "string", "description": "Knowledge point content/definition" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Search tags" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" },
+        "last_accessed": { "type": "string", "format": "date-time", "description": "Last access timestamp" }
+      },
+      "required": ["id", "document_id", "topic", "content", "created_at"]
+    },
+
+    "Document": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique document ID" },
+        "title": { "type": "string", "description": "Document title" },
+        "author": { "type": "string", "description": "Document author (optional)" },
+        "path": { "type": "string", "description": "Original file path" },
+        "format": { "type": "string", "description": "Original file format" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Import timestamp" },
+        "knowledge_points": { "type": "array", "items": { "$ref": "#/definitions/KnowledgePoint" }, "description": "Extracted knowledge points" }
+      },
+      "required": ["id", "title", "path", "format", "created_at", "knowledge_points"]
+    },
+
+    "ReviewCard": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique card ID" },
+        "knowledge_point_id": { "type": "string", "description": "Associated knowledge point ID" },
+        "document_id": { "type": "string", "description": "Source document ID" },
+        "front": { "type": "string", "description": "Card front (question/prompt)" },
+        "back": { "type": "string", "description": "Card back (answer/definition)" },
+        "stability": { "type": "number", "minimum": 0, "description": "FSRS stability value" },
+        "difficulty": { "type": "number", "minimum": 1, "maximum": 10, "description": "FSRS difficulty value" },
+        "last_review": { "type": "string", "format": "date", "description": "Last review date (YYYY-MM-DD)" },
+        "next_review": { "type": "string", "format": "date", "description": "Next scheduled review date (YYYY-MM-DD)" },
+        "review_count": { "type": "integer", "minimum": 0, "description": "Number of times reviewed" },
+        "lapse_count": { "type": "integer", "minimum": 0, "description": "Number of times marked as Again" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Card creation timestamp" }
+      },
+      "required": ["id", "knowledge_point_id", "document_id", "front", "back", "stability", "difficulty", "next_review", "review_count", "lapse_count", "created_at"]
+    },
+
+    "LearningStats": {
+      "type": "object",
+      "properties": {
+        "total_knowledge_points": { "type": "integer", "minimum": 0 },
+        "total_review_cards": { "type": "integer", "minimum": 0 },
+        "total_reviews_completed": { "type": "integer", "minimum": 0 },
+        "current_streak": { "type": "integer", "minimum": 0 },
+        "longest_streak": { "type": "integer", "minimum": 0 },
+        "retention_rate": { "type": "number", "minimum": 0, "maximum": 100 },
+        "average_difficulty": { "type": "number", "minimum": 1, "maximum": 10 },
+        "total_again_ratings": { "type": "integer", "minimum": 0 },
+        "total_hard_ratings": { "type": "integer", "minimum": 0 },
+        "total_good_ratings": { "type": "integer", "minimum": 0 },
+        "total_easy_ratings": { "type": "integer", "minimum": 0 },
+        "last_review_date": { "type": "string", "format": "date" },
+        "created_at": { "type": "string", "format": "date-time" },
+        "updated_at": { "type": "string", "format": "date-time" }
+      },
+      "required": ["total_knowledge_points", "total_review_cards", "total_reviews_completed", "current_streak", "longest_streak", "retention_rate", "average_difficulty", "created_at", "updated_at"]
+    },
+
+    "ReviewHistoryEntry": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique entry ID" },
+        "card_id": { "type": "string", "description": "Review card ID" },
+        "rating": { "type": "integer", "enum": [1, 2, 3, 4], "description": "User rating (1=Again, 2=Hard, 3=Good,4=Easy)" },
+        "review_date": { "type": "string", "format": "date-time", "description": "Review timestamp" },
+        "previous_stability": { "type": "number", "description": "Stability before review" },
+        "new_stability": { "type": "number", "description": "Stability after review" },
+        "previous_difficulty": { "type": "number", "description": "Difficulty before review" },
+        "new_difficulty": { "type": "number", "description": "Difficulty after review" },
+        "time_taken": { "type": "number", "description": "Time taken to answer in seconds" }
+      },
+      "required": ["id", "card_id", "rating", "review_date", "previous_stability", "new_stability", "previous_difficulty", "new_difficulty"]
+    },
+
+    "Question": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique question ID" },
+        "bank_id": { "type": "string", "description": "Parent question bank ID" },
+        "chapter_id": { "type": "string", "description": "Associated chapter ID" },
+        "type": { "type": "string", "enum": ["single_choice", "multiple_choice", "true_false", "short_answer", "essay"], "description": "Question type" },
+        "stem": { "type": "string", "description": "Question stem/content" },
+        "options": { "type": "array", "items": { "type": "string" }, "description": "Answer options (for choice questions)" },
+        "correct_answer": { "type": ["string", "array", "boolean"], "description": "Correct answer" },
+        "explanation": { "type": "string", "description": "Answer explanation" },
+        "difficulty": { "type": "integer", "minimum": 1, "maximum": 5, "description": "Difficulty level (1=easy, 5=hard)" },
+        "knowledge_point_ids": { "type": "array", "items": { "type": "string" }, "description": "Associated knowledge point IDs" },
+        "tags": { "type": "array", "items": { "type": "string" }, "description": "Search tags" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "bank_id", "chapter_id", "type", "stem", "correct_answer", "difficulty", "created_at"]
+    },
+
+    "Chapter": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique chapter ID" },
+        "bank_id": { "type": "string", "description": "Parent question bank ID" },
+        "parent_id": { "type": ["string", "null"], "description": "Parent chapter ID (null for root level)" },
+        "title": { "type": "string", "description": "Chapter title" },
+        "level": { "type": "integer", "minimum": 1, "description": "Chapter hierarchy level" },
+        "order": { "type": "integer", "minimum": 1, "description": "Display order within parent" },
+        "knowledge_point_ids": { "type": "array", "items": { "type": "string" }, "description": "Knowledge points covered in this chapter" },
+        "children": { "type": "array", "items": { "$ref": "#/definitions/Chapter" }, "description": "Sub-chapters" }
+      },
+      "required": ["id", "bank_id", "title", "level", "order", "created_at"]
+    },
+
+    "QuestionBank": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique question bank ID" },
+        "title": { "type": "string", "description": "Question bank title" },
+        "subject": { "type": "string", "description": "Subject/course name" },
+        "description": { "type": "string", "description": "Bank description" },
+        "source_path": { "type": "string", "description": "Original PDF file path" },
+        "chapters": { "type": "array", "items": { "$ref": "#/definitions/Chapter" }, "description": "Chapter hierarchy" },
+        "questions": { "type": "array", "items": { "$ref": "#/definitions/Question" }, "description": "All questions in the bank" },
+        "total_questions": { "type": "integer", "minimum": 0, "description": "Total number of questions" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Import timestamp" },
+        "last_updated": { "type": "string", "format": "date-time", "description": "Last update timestamp" }
+      },
+      "required": ["id", "title", "subject", "source_path", "chapters", "questions", "total_questions", "created_at", "last_updated"]
+    },
+
+    "ExamPaper": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique exam paper ID" },
+        "title": { "type": "string", "description": "Paper title" },
+        "bank_ids": { "type": "array", "items": { "type": "string" }, "description": "Source question bank IDs" },
+        "questions": { "type": "array", "items": { "$ref": "#/definitions/Question" }, "description": "Selected questions" },
+        "total_score": { "type": "integer", "minimum": 0, "description": "Total score" },
+        "duration": { "type": "integer", "minimum": 0, "description": "Exam duration in minutes" },
+        "generation_rules": { "type": "object", "description": "Rules used to generate this paper" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Creation timestamp" }
+      },
+      "required": ["id", "title", "bank_ids", "questions", "total_score", "duration", "created_at"]
+    },
+
+    "WrongQuestionRecord": {
+      "type": "object",
+      "properties": {
+        "id": { "type": "string", "description": "Unique record ID" },
+        "question_id": { "type": "string", "description": "Associated question ID" },
+        "bank_id": { "type": "string", "description": "Source question bank ID" },
+        "user_answer": { "type": ["string", "array", "boolean"], "description": "User's wrong answer" },
+        "error_reason": { "type": "string", "description": "Reason for error (user provided or auto-detected)" },
+        "stability": { "type": "number", "minimum": 0, "description": "FSRS stability value" },
+        "difficulty": { "type": "number", "minimum": 1, "maximum": 10, "description": "FSRS difficulty value" },
+        "last_review": { "type": "string", "format": "date", "description": "Last review date (YYYY-MM-DD)" },
+        "next_review": { "type": "string", "format": "date", "description": "Next scheduled review date (YYYY-MM-DD)" },
+        "review_count": { "type": "integer", "minimum": 0, "description": "Number of times reviewed" },
+        "lapse_count": { "type": "integer", "minimum": 0, "description": "Number of times marked as Again" },
+        "mastered": { "type": "boolean", "default": false, "description": "Whether the question is mastered" },
+        "created_at": { "type": "string", "format": "date-time", "description": "Error record creation timestamp" }
+      },
+      "required": ["id", "question_id", "bank_id", "user_answer", "stability", "difficulty", "next_review", "review_count", "lapse_count", "created_at"]
+    }
+  },
+
+  "files": {
+    "knowledge_base.json": {
+      "type": "object",
+      "properties": {
+        "documents": { "type": "array", "items": { "$ref": "#/definitions/Document" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["documents", "version"]
+    },
+
+    "review_deck.json": {
+      "type": "object",
+      "properties": {
+        "cards": { "type": "array", "items": { "$ref": "#/definitions/ReviewCard" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["cards", "version"]
+    },
+
+    "learning_stats.json": {
+      "$ref": "#/definitions/LearningStats"
+    },
+
+    "review_history.json": {
+      "type": "object",
+      "properties": {
+        "entries": { "type": "array", "items": { "$ref": "#/definitions/ReviewHistoryEntry" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["entries", "version"]
+    },
+
+    "question_banks.json": {
+      "type": "object",
+      "properties": {
+        "banks": { "type": "array", "items": { "$ref": "#/definitions/QuestionBank" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["banks", "version"]
+    },
+
+    "exam_papers.json": {
+      "type": "object",
+      "properties": {
+        "papers": { "type": "array", "items": { "$ref": "#/definitions/ExamPaper" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["papers", "version"]
+    },
+
+    "wrong_questions.json": {
+      "type": "object",
+      "properties": {
+        "records": { "type": "array", "items": { "$ref": "#/definitions/WrongQuestionRecord" } },
+        "version": { "type": "string", "default": "1.0" }
+      },
+      "required": ["records", "version"]
+    }
+  }
+}
