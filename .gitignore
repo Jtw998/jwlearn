@@ -1,10 +1,9 @@
-# 临时文件
+echo "# 临时文件
 tmp/
 *.log
 *.tmp
 *.pdf
 *.txt
-*.md
 __pycache__/
 *.pyc
 
@@ -15,4 +14,4 @@ data/exam_papers.json
 data/knowledge/*
 data/indexes/*
 data/cards/*
-data/stats/*
+data/stats/*" > /e/BET/jwlearn/.gitignore
